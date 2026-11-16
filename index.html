@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Red Segura – Regresos acompañados</title>
+<style>
+:root{--bg:#f5f1fb;--card:#fff;--tx:#1d1530;--mut:#6b6080;--pri:#7c3aed;--pri2:#efe7fe;--bd:#e7def5;--red:#e11d48;--yel:#f59e0b;--grn:#16a34a;--map:#f0ebf7;--road:#ddd3ea;--sh:0 10px 26px -16px rgba(91,33,182,.55);--hd:linear-gradient(135deg,#6d28d9,#a855f7 70%,#d946ef)}
+@media(prefers-color-scheme:dark){:root{--bg:#120c1c;--card:#1d1530;--tx:#f4effc;--mut:#a99bbf;--pri:#b79bff;--pri2:#31224b;--bd:#35294b;--map:#181024;--road:#2f2342;--sh:0 10px 26px -16px #000;--hd:linear-gradient(135deg,#3b1578,#6d28d9 70%,#a21caf)}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);display:flex;justify-content:center}
+#app{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
+header{padding:calc(14px + env(safe-area-inset-top,0px)) 18px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--hd);color:#fff;border-radius:0 0 26px 26px;box-shadow:0 12px 30px -18px #6d28d9;z-index:2}
+header h1{font-size:19px;letter-spacing:-.4px;display:flex;align-items:center;gap:9px}
+.lg{width:32px;height:32px;border-radius:11px;background:#ffffff2e;display:grid;place-items:center;font-size:18px;backdrop-filter:blur(4px)}
+header small{color:#ffffffbb;font-size:12px;display:block;margin-top:3px}
+.live{font-size:11px;background:#ffffff26;color:#fff;padding:5px 10px;border-radius:99px;font-weight:600}
+.live:before{content:"● ";color:#4ade80}
+main{flex:1;overflow-y:auto;padding:16px 16px 28px;scrollbar-width:none}
+section{display:none}section.on{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+nav{display:flex;border-radius:22px 22px 0 0;background:var(--card);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 28px -18px rgba(91,33,182,.5)}
+nav button{flex:1;background:none;border:0;color:var(--mut);font-size:10.5px;padding:2px 0;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-weight:500}
+nav button span{font-size:19px;padding:3px 14px;border-radius:99px;transition:.2s}
+nav button.on{color:var(--pri);font-weight:700}
+nav button.on span{background:var(--pri2)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:15px;margin-bottom:12px;box-shadow:var(--sh)}
+h2{font-size:19px;margin:2px 0 10px;letter-spacing:-.3px}
+p{font-size:13.5px;color:var(--mut);line-height:1.5}
+.btn{background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff;border:0;border-radius:13px;padding:11px 15px;font-weight:600;font-size:13.5px;cursor:pointer;transition:transform .12s;box-shadow:0 8px 16px -10px #6d28d9}
+.btn:active{transform:scale(.96)}
+.btn.ghost{background:var(--pri2);color:var(--pri);box-shadow:none}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+#layers{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px 12px;padding:2px 16px;scrollbar-width:none}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:7px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex:none;transition:.15s}
+.chip.on{background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff;border-color:transparent;box-shadow:0 6px 12px -8px #6d28d9}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--pri2);color:var(--pri);font-weight:600}
+.badge.ok{background:#16a34a22;color:var(--grn)}
+#mapwrap{border-radius:20px;overflow:hidden;border:1px solid var(--bd);background:var(--map);position:relative;box-shadow:var(--sh)}
+#mapwrap.alert{animation:glow .8s infinite alternate}
+@keyframes glow{from{box-shadow:0 0 0 0 #e11d4800}to{box-shadow:0 0 0 4px #e11d48aa,0 0 26px #e11d4877}}
+svg{display:block;width:100%;height:auto}
+.st text{paint-order:stroke;stroke:var(--map);stroke-width:3.5px;stroke-linejoin:round}
+#bar text,#disc text,#blind text,#wait text,#lgbt text,#risk text{filter:drop-shadow(0 1px 1.5px #0005)}
+#me{touch-action:none;cursor:grab}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pu 1.8s infinite}
+@keyframes pu{from{transform:scale(1);opacity:.5}to{transform:scale(3.2);opacity:0}}
+#prox{position:absolute;top:10px;left:10px;right:10px;padding:9px 12px;border-radius:14px;background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(8px);font-size:12.5px;font-weight:600;box-shadow:0 6px 18px -10px #0006;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+#prox .pb{height:4px;border-radius:9px;background:var(--bd);overflow:hidden}
+#prox .pb i{display:block;height:100%;width:0;background:var(--grn);transition:width .2s,background .2s}
+.legend{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin:10px 0 12px}
+.legend span{background:var(--card);border:1px solid var(--bd);padding:3px 9px;border-radius:99px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+#sos{width:190px;height:190px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 28%,#fda4af,#fb7185 30%,var(--red));color:#fff;font-size:36px;font-weight:800;display:block;margin:30px auto;cursor:pointer;user-select:none;touch-action:none;position:relative;overflow:hidden;animation:ring 2s infinite;box-shadow:inset 0 -10px 24px #0003}
+@keyframes ring{0%{box-shadow:inset 0 -10px 24px #0003,0 0 0 0 #e11d4877}100%{box-shadow:inset 0 -10px 24px #0003,0 0 0 38px #e11d4800}}
+#sos small{display:block;font-size:11px;font-weight:500;opacity:.9}
+#prog{position:absolute;left:0;bottom:0;height:0;width:100%;background:#0005}
+.step{font-size:13px;padding:9px 0;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:center}
+.step:last-child{border:0}
+.chat{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.msg{max-width:84%;padding:10px 13px;border-radius:18px;font-size:13.5px;line-height:1.45;animation:fi .25s}
+.msg.b{background:var(--card);border:1px solid var(--bd);align-self:flex-start;border-bottom-left-radius:5px}
+.msg.u{background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
+.inp{display:flex;gap:8px}
+.inp input,select{flex:1;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:13px;padding:11px;font-size:14px;outline:0}
+.inp input:focus,select:focus{border-color:var(--pri)}
+.bar{height:7px;border-radius:9px;background:var(--pri2);overflow:hidden;margin-top:9px}
+.bar div{height:100%;background:linear-gradient(90deg,#7c3aed,#d946ef);width:0;border-radius:9px}
+#toast{position:absolute;left:16px;right:16px;bottom:88px;background:var(--tx);color:var(--bg);padding:11px 15px;border-radius:14px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:9;box-shadow:0 10px 24px -10px #0008}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div><h1><span class="lg">♀</span>Red Segura</h1><small>Barrio Bellavista · zona delimitada</small></div><span class="live">En vivo</span></header>
+<main>
+
+<!-- MAPA -->
+<section id="s-map" class="on">
+ <div class="chips" id="layers"><button class="chip on" data-l="bar">🍸 Bares</button><button class="chip on" data-l="disc">🪩 Discos</button><button class="chip on" data-l="blind">❌ Zonas ciegas</button><button class="chip on" data-l="wait">🚕 Espera</button><button class="chip on" data-l="lgbt">🏳️‍🌈 LGBTIQ+</button><button class="chip on" data-l="risk">⚠️ Riesgo</button><button class="chip on" data-l="pv">🟣 Puntos Violeta</button><button class="chip on" data-l="rAcc">Ruta aceleración</button><button class="chip on" data-l="rDes">Ruta desvío</button><button class="chip on" data-l="rCol">Ruta cuidado colectivo</button><button class="chip on" data-l="zJov">Jóvenes 25-30</button><button class="chip on" data-l="zUni">Universitaria 18-25</button></div>
+ <div id="mapwrap"><div id="prox"></div>
+ <svg id="map" viewBox="0 0 720 500">
+  <polygon points="560,40 720,20 720,110 590,90" fill="#86efac" opacity=".25"/>
+  <g stroke="var(--road)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+   <path d="M333 0L320 495M413 110L418 450M520 190L525 497M245 50L200 440M135 125L80 400M140 160L330 205L720 160M95 290L330 322L520 322M60 405L330 462L720 400M580 78L720 55M490 165L720 120"/>
+  </g>
+  <g class="st" font-size="12" fill="var(--mut)" font-weight="600">
+   <text x="345" y="82">Constitución</text><text x="150" y="172" transform="rotate(12 150 172)">Antonia López de Bello</text>
+   <text x="105" y="313">Dardignac</text><text x="80" y="418">Bellavista</text><text x="565" y="68">Av. Carlos Reed</text>
+   <text x="338" y="30" transform="rotate(90 338 30)">Pío Nono</text><text x="535" y="350" transform="rotate(90 535 350)">Mallinkrodt</text>
+  </g>
+  <polygon id="zUni" points="240,40 335,50 330,200 300,280 215,330 170,300 210,170 225,100" fill="#60a5fa" opacity=".28"/>
+  <polygon id="zJov" points="415,125 480,170 515,230 490,290 425,320 420,440 340,420 335,200 380,190" fill="#4ade80" opacity=".28"/>
+  <g fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+   <g id="rDes" stroke="#f59e0b" stroke-dasharray="9 6"><path d="M120 160L270 200L330 205M130 160L95 290L80 400M95 290L330 322M413 322L520 322"/></g>
+   <g id="rAcc" stroke="#ef2b2b" stroke-dasharray="9 6"><path d="M322 60L320 495M225 230L195 430M330 205L500 205M55 120L100 150"/></g>
+   <g id="rCol" stroke="#a855f7"><path d="M336 70L328 460M415 150L420 440M245 150L210 330L195 445L330 462L420 455"/></g>
+  </g>
+  <rect x="30" y="25" width="520" height="460" rx="18" fill="none" stroke="var(--pri)" stroke-width="2" stroke-dasharray="8 6"/>
+  <g id="bar"></g><g id="disc"></g><g id="blind"></g><g id="wait"></g><g id="lgbt"></g><g id="risk"></g><g id="pv"></g><g id="rep"></g>
+  <g id="me" transform="translate(365 300)"><circle r="24" fill="transparent"/><circle class="pulse" r="9" fill="#2563eb"/><circle r="8" fill="#2563eb" stroke="#fff" stroke-width="3"/></g>
+ </svg>
+ </div>
+ <div class="row" style="margin-top:10px"><button class="btn" id="hapBtn" style="flex:1">📳 Alerta háptica: apagada</button><button class="btn ghost" id="walkBtn" style="flex:1">🚶 Simular caminata</button></div>
+ <p style="margin-top:8px;font-size:12px">Arrastra tu punto 🔵 por el mapa o simula una caminata: el teléfono vibra más rápido mientras más cerca estés de una zona de riesgo o ciega. En iPhone la vibración no está disponible; verás la alerta visual.</p>
+ <div class="legend"><span><i style="background:#ef2b2b"></i>Aceleración del paso</span><span><i style="background:#f59e0b"></i>Evitación / desvío</span><span><i style="background:#a855f7"></i>Cuidado colectivo</span><span><i style="background:#4ade80"></i>Jóvenes adultos (25-30)</span><span><i style="background:#60a5fa"></i>Universitaria (18-25)</span><span><i style="background:#7c3aed"></i>Punto Violeta</span><span><i style="background:#2563eb"></i>Tú</span></div>
+ <div class="card">
+  <div class="row"><b style="font-size:14px">Reportar una situación</b><button class="btn ghost" id="repBtn">+ Reportar</button></div>
+  <div id="repForm" style="display:none;margin-top:10px">
+   <select id="repType"><option>Calle sin luz</option><option>Persona que incomoda / acosa</option><option>Calle desolada</option><option>Obra o vereda en mal estado</option></select>
+   <p style="margin:8px 0">Toca el mapa para marcar el lugar. La ruta se actualizará para todas.</p>
+  </div>
+  <div id="repList"></div>
+ </div>
+</section>
+
+<!-- ACOMPAÑADAS -->
+<section id="s-walk">
+ <h2>Regresos acompañados</h2>
+ <div class="card">
+  <div class="row"><div><b>Modo tránsito seguro</b><p>Compartes tu ruta solo dentro del área delimitada.</p></div><button class="btn" id="walkTgl">Activar</button></div>
+  <div id="walkSt" style="display:none"><p style="margin-top:10px" id="walkTx"></p><div class="bar"><div id="walkBar"></div></div></div>
+ </div>
+ <b style="font-size:14px">Grupos saliendo cerca</b>
+ <div id="groups" style="margin-top:8px"></div>
+ <div class="card"><b style="font-size:14px">Pedir compañía</b><p style="margin:6px 0 10px">Avisa a la red que vas a volver y quién puede acompañarte parte del camino.</p>
+  <div class="inp"><input id="dest" placeholder="¿A dónde vuelves? (ej: Metro Baquedano)"><button class="btn" id="askBtn">Pedir</button></div></div>
+</section>
+
+<!-- SOS -->
+<section id="s-sos">
+ <h2 style="text-align:center">Botón SOS</h2>
+ <p style="text-align:center">Mantén presionado 2 segundos para enviar tu ubicación en tiempo real.</p>
+ <button id="sos">SOS<small>mantén presionado</small><div id="prog"></div></button>
+ <div class="card" id="sosLog" style="display:none"></div>
+ <div class="card"><b style="font-size:14px">Se enviará a</b>
+  <div class="step">🏛️ Seguridad Ciudadana · Municipalidad</div>
+  <div class="step">🟣 Punto Violeta más cercano</div>
+  <div class="step">👥 Contactos de confianza (Cami, Mamá, Vale)</div></div>
+ <p style="text-align:center">En emergencia grave también llama al <b>133</b> (Carabineros) · Fono orientación <b>1455</b></p>
+</section>
+
+<!-- OCIO -->
+<section id="s-bar">
+ <h2>Ocio nocturno seguro</h2>
+ <p style="margin-bottom:10px">Locales que operan bajo los «Protocolos de Ocio Nocturno Seguro».</p>
+ <div class="chips" id="bf"><button class="chip on" data-f="all">Todos</button><button class="chip" data-f="open">Abiertos ahora</button><button class="chip" data-f="vio">Con Punto Violeta interno</button></div>
+ <div id="bars"></div>
+</section>
+
+<!-- VIAJE -->
+<section id="s-ride">
+ <h2>Conductoras de la red</h2>
+ <p style="margin-bottom:10px">Viajes entre zonas de espera 🚕, solo dentro del área delimitada. Conductoras mujeres y disidencias, verificadas.</p>
+ <div id="rMap" style="border-radius:16px;overflow:hidden;border:1px solid var(--bd);background:var(--map);margin-bottom:10px"></div>
+ <div class="card" id="rForm">
+  <p style="margin-bottom:4px">Recogida</p><select id="rFrom" style="width:100%;margin-bottom:8px"></select>
+  <p style="margin-bottom:4px">Destino (dentro del área)</p><select id="rTo" style="width:100%;margin-bottom:10px"></select>
+  <button class="btn" id="rGo" style="width:100%">Pedir conductora</button>
+ </div>
+ <div class="card" id="rStat" style="display:none"></div>
+</section>
+
+<!-- CHAT -->
+<section id="s-chat">
+ <h2>Asistencia y contención</h2>
+ <div class="chat" id="chat"></div>
+ <div class="chips" id="quick"><button class="chip">Me siento insegura</button><button class="chip">Me siguieron</button><button class="chip">Necesito hablar</button></div>
+ <div class="inp"><input id="ci" placeholder="Escribe aquí…"><button class="btn" id="cs">Enviar</button></div>
+</section>
+</main>
+<div id="toast"></div>
+<nav id="nav">
+ <button class="on" data-t="map"><span>🗺️</span>Mapa</button>
+ <button data-t="walk"><span>👭</span>Acompañadas</button>
+ <button data-t="ride"><span>🚗</span>Viaje</button>
+ <button data-t="sos"><span>🆘</span>SOS</button>
+ <button data-t="bar"><span>🍸</span>Locales</button>
+ <button data-t="chat"><span>💬</span>Ayuda</button>
+</nav>
+</div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2400)}
+// Navegación
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('nav button').forEach(x=>x.classList.toggle('on',x===b));$$('section').forEach(s=>s.classList.toggle('on',s.id==='s-'+b.dataset.t));$('main').scrollTop=0};
+// Capas
+$('#layers').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;b.classList.toggle('on');$('#'+b.dataset.l).style.display=b.classList.contains('on')?'':'none'};
+
+// Capas del mapa
+const P={bar:['🍸',[[215,155],[305,180],[305,215],[305,265],[345,245],[345,270],[345,345],[345,375],[380,380],[425,135],[445,175],[400,225],[435,225],[455,195],[495,250],[445,300],[500,300],[195,300],[305,300]]],
+disc:['🪩',[[250,45],[300,75],[312,110],[80,110],[105,125],[235,140],[222,198],[210,245],[250,270],[180,325],[350,220],[375,220],[280,210]]],
+blind:['❌',[[508,207],[90,293],[195,435],[420,450]]],
+wait:['🚕',[[165,70],[325,88],[250,128],[285,190],[412,272],[222,292],[325,290],[78,400],[327,462],[505,320]]],
+lgbt:['🏳️‍🌈',[[100,97]]],
+risk:['⚠️',[[58,127],[255,100],[232,225],[330,205],[330,250],[115,297],[215,320],[328,325],[322,385],[460,322],[385,205],[460,205]]]};
+for(const k in P)$('#'+k).innerHTML=P[k][1].map(p=>`<text x="${p[0]}" y="${p[1]}" font-size="19" text-anchor="middle" dominant-baseline="central">${P[k][0]}</text>`).join('');
+const PV=[[290,130,'Pío Nono / Antonia López'],[180,110,'Ernesto Pinto Lagarrigue norte'],[120,230,'Parisina'],[270,345,'Dardignac / Pío Nono'],[455,265,'Constitución / Mallinkrodt'],[375,440,'Bellavista / Pío Nono']];
+$('#pv').innerHTML=PV.map(p=>`<g><title>Punto Violeta · ${p[2]}</title><circle cx="${p[0]}" cy="${p[1]}" r="12" fill="#7c3aed" stroke="#fff" stroke-width="2.5"/><text x="${p[0]}" y="${p[1]}" font-size="10" font-weight="800" fill="#fff" text-anchor="middle" dominant-baseline="central">PV</text></g>`).join('');
+// Alerta háptica por cercanía
+const RP=[];let hapOn=false,hapT,wRaf,walking2=false,me=[365,300],lastLv=0;
+const meG=$('#me'),PXM=1.15,LC=['#16a34a','#f59e0b','#f97316','#e11d48'];
+function near(){let b={m:1e9,t:''};const L=[...P.risk[1].map(p=>[p,'zona de riesgo']),...P.blind[1].map(p=>[p,'zona ciega']),...RP.map(p=>[p,'zona reportada'])];
+ L.forEach(([p,t])=>{const m=Math.hypot(p[0]-me[0],p[1]-me[1])*PXM;if(m<b.m)b={m,t}});return b}
+const lvOf=m=>m<30?3:m<70?2:m<120?1:0;
+function prox(){const n=near(),lv=lvOf(n.m),m=Math.round(n.m);
+ const tx=['✅ Ruta despejada · sin zonas de riesgo cerca',`⚠️ ${n.t} a ~${m} m`,`⚠️ Te acercas a una ${n.t} (~${m} m)`,`🚨 Estás en una ${n.t}. Busca un lugar iluminado`][lv];
+ $('#prox').innerHTML=`<span>${tx}</span><div class="pb"><i style="width:${lv?Math.round((1-n.m/120)*100):0}%;background:${LC[lv]}"></i></div>`;
+ $('#mapwrap').classList.toggle('alert',hapOn&&lv>=2);
+ if(lv>lastLv&&lv>=2){toast(tx);if(hapOn&&navigator.vibrate)navigator.vibrate([150,80,150,80,300])}
+ lastLv=lv}
+function hap(){clearTimeout(hapT);if(!hapOn)return;const n=near();let next=700;
+ if(n.m<120){if(navigator.vibrate)navigator.vibrate(Math.round(30+(120-n.m)*1.4));next=250+n.m*9}
+ hapT=setTimeout(hap,next)}
+$('#hapBtn').onclick=()=>{hapOn=!hapOn;$('#hapBtn').textContent='📳 Alerta háptica: '+(hapOn?'activa':'apagada');
+ if(hapOn){if(navigator.vibrate)navigator.vibrate(80);else toast('Este dispositivo no vibra; verás solo la alerta visual');hap()}else{clearTimeout(hapT);navigator.vibrate&&navigator.vibrate(0)}prox()};
+function setMe(x,y){me=[x,y];meG.setAttribute('transform',`translate(${x} ${y})`);prox()}
+function stopW(){walking2=false;cancelAnimationFrame(wRaf);$('#walkBtn').textContent='🚶 Simular caminata'}
+$('#walkBtn').onclick=()=>{if(walking2)return stopW();walking2=true;$('#walkBtn').textContent='⏹ Detener';const t0=performance.now();
+ (function f(){const k=Math.min(1,(performance.now()-t0)/16000);setMe(336-8*k,70+390*k);if(k<1&&walking2)wRaf=requestAnimationFrame(f);else stopW()})()};
+let drag=false;
+meG.addEventListener('pointerdown',e=>{drag=true;stopW();meG.setPointerCapture(e.pointerId);e.preventDefault()});
+meG.addEventListener('pointermove',e=>{if(!drag)return;const s=$('#map'),p=s.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(s.getScreenCTM().inverse());setMe(Math.max(30,Math.min(550,q.x)),Math.max(25,Math.min(485,q.y)))});
+['pointerup','pointercancel'].forEach(v=>meG.addEventListener(v,()=>drag=false));
+prox();
+// Reportes
+let repMode=false;const reps=[];
+$('#repBtn').onclick=()=>{repMode=!repMode;$('#repForm').style.display=repMode?'block':'none';$('#repBtn').textContent=repMode?'Cancelar':'+ Reportar'};
+$('#map').onclick=e=>{if(!repMode||e.target.closest('#me'))return;const s=$('#map'),p=s.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(s.getScreenCTM().inverse());
+ const t=$('#repType').value,c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+ c.setAttribute('cx',q.x);c.setAttribute('cy',q.y);c.setAttribute('r',20);c.setAttribute('fill','#e11d48');c.setAttribute('opacity','.35');$('#rep').appendChild(c);
+ reps.unshift(t);RP.push([q.x,q.y]);prox();$('#repList').innerHTML=reps.slice(0,3).map(r=>`<div class="step">📍 ${r} <span class="badge" style="margin-left:auto">Ruta actualizada</span></div>`).join('');
+ toast('Reporte enviado. Rutas recalculadas ✔');$('#repBtn').click()};
+// Acompañadas
+const G=[['Bellavista → Metro Baquedano','02:30',3],['Av. Pío Nono → Providencia','02:45',2],['Patronato → Metro Cerro Blanco','03:00',4]];
+$('#groups').innerHTML=G.map((g,i)=>`<div class="card"><div class="row"><div><b style="font-size:14px">${g[0]}</b><p>Sale ${g[1]} · ${g[2]} personas · dentro del área</p></div><button class="btn ghost" data-i="${i}">Unirme</button></div></div>`).join('');
+$('#groups').onclick=e=>{const b=e.target.closest('button');if(!b)return;b.textContent='✔ Unida';b.disabled=true;toast('Te uniste al grupo. Se avisó a tus contactos.')};
+let walking=false,wt;
+$('#walkTgl').onclick=()=>{walking=!walking;$('#walkTgl').textContent=walking?'Detener':'Activar';$('#walkSt').style.display=walking?'block':'none';clearInterval(wt);
+ if(walking){let p=0;$('#walkTx').textContent='Compartiendo ubicación con tu red. Llegada estimada en 12 min.';wt=setInterval(()=>{p=Math.min(100,p+8);$('#walkBar').style.width=p+'%';if(p>=100){clearInterval(wt);$('#walkTx').textContent='¡Llegaste! Avisando a tu red…'}},1000)}};
+$('#askBtn').onclick=()=>{const d=$('#dest').value.trim();toast(d?'Pedido enviado: buscando compañía hacia '+d:'Escribe tu destino primero')};
+// SOS
+let st,raf;const pr=$('#prog');
+function startSOS(){const t0=performance.now();(function f(){const p=Math.min(1,(performance.now()-t0)/2000);pr.style.height=(p*100)+'%';if(p>=1)return fire();raf=requestAnimationFrame(f)})()}
+function stopSOS(){cancelAnimationFrame(raf);pr.style.height=0}
+function fire(){pr.style.height=0;const L=$('#sosLog');L.style.display='block';L.innerHTML='<b style="color:var(--red)">🚨 Alerta SOS activada</b>';
+ ['Ubicación en tiempo real enviada a Seguridad Ciudadana','Punto Violeta más cercano notificado (Pío Nono 40)','Contactos de confianza alertados por SMS y push','Una funcionaria te contactará en el chat de ayuda'].forEach((t,i)=>setTimeout(()=>{L.insertAdjacentHTML('beforeend',`<div class="step">✅ ${t}</div>`)},700*(i+1)));if(navigator.vibrate)navigator.vibrate(200)}
+const sb=$('#sos');['mousedown','touchstart'].forEach(v=>sb.addEventListener(v,e=>{e.preventDefault();startSOS()}));['mouseup','mouseleave','touchend','touchcancel'].forEach(v=>sb.addEventListener(v,stopSOS));
+// Locales
+const B=[['La Terraza Violeta','Bellavista 123',1,1],['Club Aurora','Pío Nono 250',1,0],['Bar El Faro','Constitución 88',0,1],['Disco Lumen','Antonia López 310',1,1]];
+function renderBars(f){$('#bars').innerHTML=B.filter(b=>f==='all'||(f==='open'&&b[2])||(f==='vio'&&b[3])).map(b=>`<div class="card"><div class="row"><b>${b[0]}</b><span class="badge ok">Protocolo ✔</span></div><p>${b[1]} · ${b[2]?'Abierto ahora':'Cerrado'}</p><div class="chips" style="margin:8px 0 0"><span class="badge">Personal capacitado</span><span class="badge">Salida acompañada</span>${b[3]?'<span class="badge">Punto Violeta</span>':''}</div></div>`).join('')}
+renderBars('all');
+$('#bf').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;$$('#bf .chip').forEach(x=>x.classList.toggle('on',x===b));renderBars(b.dataset.f)};
+
+// Viajes con conductoras
+const ZN=['Parisina norte','Pío Nono norte','Ernesto Pinto Lagarrigue','Antonia López / Pío Nono','Constitución / Dardignac','Dardignac poniente','Pío Nono / Dardignac','Parisina / Bellavista','Pío Nono / Bellavista','Mallinkrodt / Dardignac'];
+const W=P.wait[1],DR=[['Camila R.','Toyota Yaris gris','KXRT-42','4.9'],['Francisca M.','Kia Morning rojo','LPZD-18','4.8'],['Antonia V.','Suzuki Swift azul','HJBN-77','5.0']];
+$('#rFrom').innerHTML=ZN.map((n,i)=>`<option value="${i}">🚕 ${n}</option>`).join('');
+$('#rTo').innerHTML=$('#rFrom').innerHTML;$('#rTo').value=8;$('#rFrom').value=6;
+const rm=$('#map').cloneNode(true);rm.removeAttribute('id');
+['bar','disc','blind','risk','pv','me','rep','lgbt','zUni','zJov'].forEach(i=>rm.querySelector('#'+i).remove());
+rm.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+const NS='http://www.w3.org/2000/svg',rg=document.createElementNS(NS,'g');rm.appendChild(rg);$('#rMap').appendChild(rm);
+let RT=[],RF=0,car=null;
+const mk=(t,x,y,s)=>`<text x="${x}" y="${y}" font-size="${s||22}" text-anchor="middle" dominant-baseline="central">${t}</text>`;
+const lerp=(a,b,k)=>[a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k];
+function rReset(){RT.forEach(clearTimeout);cancelAnimationFrame(RF);rg.innerHTML='';$('#rStat').style.display='none';$('#rForm').style.display='block'}
+function rStat(h){const s=$('#rStat');s.style.display='block';s.innerHTML=h;$('#rForm').style.display='none'}
+function move(a,b,ms,done){const t0=performance.now();(function f(){const k=Math.min(1,(performance.now()-t0)/ms),p=lerp(a,b,k);car.setAttribute('x',p[0]);car.setAttribute('y',p[1]);const br=$('#rBar');if(br)br.style.width=k*100+'%';if(k<1)RF=requestAnimationFrame(f);else done&&done()})()}
+const cancelB='<button class="btn ghost" id="rCancel" style="width:100%;margin-top:10px">Cancelar</button>';
+function bindCancel(){const c=$('#rCancel');if(c)c.onclick=()=>{rReset();toast('Viaje cancelado')}}
+$('#rGo').onclick=()=>{const a=+$('#rFrom').value,b=+$('#rTo').value;if(a===b)return toast('Elige un destino distinto');
+ const A=W[a],B=W[b],d=Math.hypot(A[0]-B[0],A[1]-B[1])*1.3,fare=Math.round((1500+d*2.2)/100)*100,min=Math.max(2,Math.round(d/60));
+ rg.innerHTML=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="#a855f7" stroke-width="5" stroke-dasharray="2 8" stroke-linecap="round"/><circle cx="${A[0]}" cy="${A[1]}" r="11" fill="none" stroke="#2563eb" stroke-width="4"/><circle cx="${B[0]}" cy="${B[1]}" r="11" fill="#a855f7" opacity=".6"/>`;
+ rStat(`<b>🔎 Buscando conductoras verificadas…</b><p style="margin-top:4px">${ZN[a]} → ${ZN[b]} · ~${min} min · $${fare.toLocaleString('es-CL')} (tarifa solidaria)</p>`+cancelB);bindCancel();
+ RT.push(setTimeout(()=>{const d0=DR[Math.floor(Math.random()*3)],pin=1000+Math.floor(Math.random()*9000),S=[Math.min(540,Math.max(50,A[0]+80)),Math.max(40,A[1]-60)];
+  rg.insertAdjacentHTML('beforeend',mk('🚗',S[0],S[1]));car=rg.lastChild;
+  rStat(`<div class="row"><div><b>${d0[0]}</b> <span class="badge ok">Verificada</span><p>${d0[1]} · ${d0[2]} · ⭐ ${d0[3]}</p></div><span style="font-size:30px">👩‍🦰</span></div><p style="margin:10px 0 4px" id="rTx">Va hacia ${ZN[a]}…</p><div class="bar"><div id="rBar"></div></div>`+cancelB);bindCancel();
+  move(S,A,4000,()=>{rStat(`<b>🚗 ${d0[0]} llegó a ${ZN[a]}</b><p style="margin:6px 0">Confirma su patente <b>${d0[2]}</b> y dile este código antes de subir:</p><div style="font-size:30px;font-weight:800;letter-spacing:8px;text-align:center;color:var(--pri)">${pin}</div><button class="btn" id="rIn" style="width:100%;margin-top:10px">Ya subí</button>`+cancelB);bindCancel();
+   $('#rIn').onclick=()=>{rStat(`<b>En viaje hacia ${ZN[b]}</b><p style="margin:4px 0">Tu ruta se comparte con tus contactos de confianza.</p><div class="bar"><div id="rBar"></div></div><div class="row" style="margin-top:10px"><button class="btn ghost" id="rSh" style="flex:1">Compartir viaje</button><button class="btn" id="rSos" style="flex:1;background:var(--red)">SOS</button></div>`);
+    $('#rSh').onclick=()=>toast('Viaje compartido con Cami, Mamá y Vale');
+    $('#rSos').onclick=()=>{$('#nav button[data-t=sos]').click();fire()};
+    move(A,B,9000,()=>{rStat(`<b>✅ Llegaste a ${ZN[b]}</b><p style="margin:4px 0 8px">Se avisó a tus contactos. ¿Cómo estuvo tu viaje con ${d0[0]}?</p><div style="display:flex;gap:6px;justify-content:center;font-size:26px">${[1,2,3,4,5].map(n=>`<button class="chip rs" style="font-size:22px">⭐</button>`).join('')}</div>`);
+     $$('.rs').forEach(b=>b.onclick=()=>{toast('¡Gracias por cuidar la red! 💜');rReset()})})}})},2200))};
+// Chat
+const chat=$('#chat');
+function add(t,c){chat.insertAdjacentHTML('beforeend',`<div class="msg ${c}">${t}</div>`);$('main').scrollTop=1e5}
+add('Hola 💜 Soy tu canal de asistencia. Estoy aquí para acompañarte. ¿Cómo te sientes?','b');
+function reply(t){t=t.toLowerCase();
+ if(/sigu|persig|acos|peligro|miedo/.test(t))return 'Gracias por avisar. Camina hacia una calle iluminada o un local abierto. Puedo activar el SOS o buscar el Punto Violeta más cercano (a 2 cuadras). ¿Lo hago?';
+ if(/hablar|triste|mal|sola|ansi/.test(t))return 'Te leo y estoy contigo. No tienes que explicarlo todo. Si quieres, cuéntame qué pasó; también puedo conectarte con una profesional del 1455.';
+ if(/inseg/.test(t))return 'Tu sensación importa. Puedo mostrarte la ruta iluminada más cercana o conectarte con una compañera de la red. ¿Cuál prefieres?';
+ return 'Te escucho. Si estás en peligro inmediato, usa el botón SOS o llama al 133. ¿Quieres que te conecte con una persona de la red?'}
+function send(t){if(!t.trim())return;add(t,'u');$('#ci').value='';setTimeout(()=>add(reply(t),'b'),700)}
+$('#cs').onclick=()=>send($('#ci').value);$('#ci').onkeydown=e=>{if(e.key==='Enter')send($('#ci').value)};
+$('#quick').onclick=e=>{const b=e.target.closest('.chip');if(b)send(b.textContent)};
+</script>
+</body>
+</html>

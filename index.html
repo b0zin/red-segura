@@ -246,10 +246,10 @@ let st,raf;const pr=$('#prog');
 function startSOS(){const t0=performance.now();(function f(){const p=Math.min(1,(performance.now()-t0)/2000);pr.style.height=(p*100)+'%';if(p>=1)return fire();raf=requestAnimationFrame(f)})()}
 function stopSOS(){cancelAnimationFrame(raf);pr.style.height=0}
 function fire(){pr.style.height=0;const L=$('#sosLog');L.style.display='block';L.innerHTML='<b style="color:var(--red)">🚨 Alerta SOS activada</b>';
- ['Ubicación en tiempo real enviada a Seguridad Ciudadana','Punto Violeta más cercano notificado (Pío Nono 40)','Contactos de confianza alertados por SMS y push','Una funcionaria te contactará en el chat de ayuda'].forEach((t,i)=>setTimeout(()=>{L.insertAdjacentHTML('beforeend',`<div class="step">✅ ${t}</div>`)},700*(i+1)));if(navigator.vibrate)navigator.vibrate(200)}
+ ['Ubicación en tiempo real enviada a Seguridad Ciudadana','Punto Violeta más cercano notificado','Contactos de confianza alertados por SMS y push','Una funcionaria te contactará en el chat de ayuda'].forEach((t,i)=>setTimeout(()=>{L.insertAdjacentHTML('beforeend',`<div class="step">✅ ${t}</div>`)},700*(i+1)));if(navigator.vibrate)navigator.vibrate(200)}
 const sb=$('#sos');['mousedown','touchstart'].forEach(v=>sb.addEventListener(v,e=>{e.preventDefault();startSOS()}));['mouseup','mouseleave','touchend','touchcancel'].forEach(v=>sb.addEventListener(v,stopSOS));
 // Locales
-const B=[['La Terraza Violeta','Bellavista 123',1,1],['Club Aurora','Pío Nono 250',1,0],['Bar El Faro','Constitución 88',0,1],['Disco Lumen','Antonia López 310',1,1]];
+const B=[['Bar ejemplo 1','"Dirección"',1,1],['Bar ejemplo 2','"Dirección"',1,0],['Discoteca ejemplo 1','"Dirección"',0,1],['Discoteca ejemplo 2','"Dirección"',1,1]];
 function renderBars(f){$('#bars').innerHTML=B.filter(b=>f==='all'||(f==='open'&&b[2])||(f==='vio'&&b[3])).map(b=>`<div class="card"><div class="row"><b>${b[0]}</b><span class="badge ok">Protocolo ✔</span></div><p>${b[1]} · ${b[2]?'Abierto ahora':'Cerrado'}</p><div class="chips" style="margin:8px 0 0"><span class="badge">Personal capacitado</span><span class="badge">Salida acompañada</span>${b[3]?'<span class="badge">Punto Violeta</span>':''}</div></div>`).join('')}
 renderBars('all');
 $('#bf').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;$$('#bf .chip').forEach(x=>x.classList.toggle('on',x===b));renderBars(b.dataset.f)};
